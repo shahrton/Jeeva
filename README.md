@@ -7,7 +7,7 @@ This is a file/directory utility useful for:
 A. When called with **--compare**: for comparing 2 directories (or directory trees). No copying is done. 
 Primarily useful for comparing directories/trees that are expected to be very similar or identical and you are trying to find where the differences are.
 
-B. Mirroring directories, when called with **--copy**. Quick simple copy to another location with zero sophistication. Primarily useful for keeping a mirror on another hard drive or for frequent copying to a USB stick. Short copying time as allows one to selectively copy over to the destination folder only those files that are newer in source than in the destination folder, useful when the total number of files is large but the number of newer files is relatively small. Optionally recursively descend directory tree.
+B. Mirroring directories, when called with **--copy**. Quick simple copy to another location with zero sophistication. Primarily useful for keeping a mirror on another hard drive or for frequent copying to a USB stick. Short copying time as allows one to selectively copy over to the destination directory only those files that are newer in source than in the destination directory, useful when the total number of files is large but the number of newer files is relatively small. Optionally recursively descend directory tree.
 
 
 ### Detailed Description:
