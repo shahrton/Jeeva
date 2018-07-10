@@ -21,9 +21,9 @@ This is a file/directory utility useful for:
 With `--details d_option` option displays actual file names in these 6 categories. `d_option` must be one of "yes", "query" or a 6 character yes/no mask (e.g. "yyyyyy" or "ynynyn" or "nnnnnn") to select which of the 6 quantities you wish displayed.
 
 **B. Copying:**
-`jeeva --copy mod Source Dest`  : copies regular files that are newer in Source. Files that are in Source but not in Dest are **not** copied. With `--recursive`, descends tree structure, copying newer regular files. Never copies directory files.
+`jeeva --copy mod Source Dest`  : copies regular files that are newer in Source. Files that are in Source but not in Dest are **not** copied. With `--recursive`, does same while descending tree structure. Never copies directory files.
 
-`jeeva --copy update Source Dest` : Similar to *mod* but additionally copies regular files that are in Source but not in Dest.  With `--recursive`, descends tree structure and copies regular files. With `--recursive --mkdir yes` (or `--mkdir query`), directories that are in Source but not in Dest are also created and copied along with their contents. 
+`jeeva --copy update Source Dest` : Similar to *mod* but additionally copies regular files that are in Source but not in Dest.  With `--recursive`, does same while descending tree structure. With `--recursive --mkdir yes` (or `--mkdir query`), additionally, directories that are in Source but not in Dest are created and copied along with their contents. 
 
 Both Source and Dest must exist beforehand and, rather than that I implement a `jeeva --copy all Source Dest`, use your OS's directory tree copying utility to initially create Dest. (MS Windows use `robocopy`. Linux/Unix/Apple use `cp -ar` or `cp -r`)
 
