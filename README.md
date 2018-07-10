@@ -21,9 +21,11 @@ This is a file/directory utility useful for:
 With `--details d_option` option displays actual file names in these 6 categories. `d_option` must be one of "yes", "query" or a 6 character yes/no mask (e.g. "yyyyyy" or "ynynyn" or "nnnnnn") to select which of the 6 quantities above you wish to display.
 
 **B. Copying:**
-`jeeva --copy all Source Dest` : Copies all regular files from directory Source to directory Dest. Adding `--recursive` copies entire directory tree structure, overwriting Dest. If this is being done for the first time I receommend just using your OS's directory tree copying utility, and use `jeeva` only for subsequent over-writing. I FEEL THIS COMMAND IS UNNECESSARY.
-Option `--dryrun` shows what action would be taken *without actually doing any copying*, to allow a check beforehand.
+`jeeva --copy mod Source Dest`  : copies regular files that are newer in Source. Files that are in Source but not in Dest are **not** copied. With `--recursive`, descends tree structure, copying newer regular files. Never copies directory files.
 
-`jeeva --copy newer Source Dest`  : copies regular files that are newer in Source. Files that are in Source but not in Dest are **not** copied. With `--recursive`, descends tree structure, copying newer regular files. Never copies directory files.
+`jeeva --copy update Source Dest` : Similar to *mod* but additionally copies regular files that are in Source but not in Dest.  With `--recursive`, descends tree structure and copies regular files. With `--recursive --mkdir yes` (or `--mkdir query`), directories that are in Source but not in Dest are also created and copied along with their contents. 
 
-`jeeva --copy update Source Dest` : Similar to *newer* but additionally copies regular files that are in Source but not in Dest.  With `--recursive`, descends tree structure. With `--recursive and --mkdir yes` (or `--mkdir query`), directories that are in Source but not in Dest are also created and copied. 
+Both Source and Dest must exist beforehand and, rather than that I implement a `jeeva --copy all Source Dest`, use your OS's directory tree copying utility to initially create Dest. (MS Windows use `robocopy`. Linux/Unix/Apple use `cp -ar` or `cp -r`)
+
+Option `--dryrun` shows what action would be taken *without doing any actual copying*, to allow a check beforehand.
+
