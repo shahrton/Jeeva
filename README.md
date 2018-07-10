@@ -16,9 +16,9 @@ This is a file/directory utility useful for:
    1. Number of regular files in source directory but not destination directory
    2. Number of regular files in both source and destination
    3. Number in destination but not source, 
-   4,5,6. The same 3 corresponding values but for directories instead of for regular files
+   4. (and 5,6) The same 3 corresponding values but for directories instead of for regular files
 
-With `--details d_option` option displays actual file names in these 6 categories. `d_option` must be one of "yes", "query" or a 6 character yes/no mask (e.g. "yyyyyy" or "ynynyn" or "nnnnnn") to select which of the 6 quantities above you wish to display.
+With `--details d_option` option displays actual file names in these 6 categories. `d_option` must be one of "yes", "query" or a 6 character yes/no mask (e.g. "yyyyyy" or "ynynyn" or "nnnnnn") to select which of the 6 quantities you wish displayed.
 
 **B. Copying:**
 `jeeva --copy mod Source Dest`  : copies regular files that are newer in Source. Files that are in Source but not in Dest are **not** copied. With `--recursive`, descends tree structure, copying newer regular files. Never copies directory files.
