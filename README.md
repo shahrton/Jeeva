@@ -24,6 +24,17 @@ Example: `jeeva --compare .\Videos D:\Shaheen\Mirror\Videos` produces:
 ```Source folder:.\Videos        Destination folder:D:\Shaheen\Mirror\Videos`
 Videos (23,0,0 ; 16,3,0)```  
 indicating that the first directory contains 23 regular files not in the second directory, 16 sub-dirs not in second directory, and 3 sub-dirs are common to both directories.
+Adding `--recursive` produces:  
+```
+Source folder:.\Videos        Destination folder:D:\Shaheen\Mirror\Videos
+Videos (23,0,0 ; 16,3,0)
+   |->2017 (0,23,0 ; 0,0,0)
+   |->Lumix (0,1,0 ; 1,2,0)
+      |->Ohio 2018 (20,60,91 ; 0,0,0)
+      |->India Trip Feb Mar 2018 (0,98,0 ; 0,0,0)
+   |->2018 (2,7,0 ; 0,0,0)
+
+```
 
 **B. Copying:**
 `jeeva --copy mod Source Dest`  : copies regular files that are newer in Source. Files that are in Source but not in Dest are **not** copied. With `--recursive`, does same while descending tree structure. Never copies directory files.
