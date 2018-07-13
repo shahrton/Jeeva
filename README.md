@@ -21,8 +21,9 @@ With `--details d_option` option displays actual file names in these 6 categorie
 
 Example: `jeeva --compare .\Videos D:\Shaheen\Mirror\Videos` produces:
 
-`Source folder:.\Videos        Destination folder:D:\Shaheen\Mirror\Videos`  
-`Videos (23,0,0 ; 16,3,0)` indicating that the first directory contains 23 regular files not in the second directory, 16 sub-dirs not in second directory, and 3 sub-dirs are common to both directories.
+```Source folder:.\Videos        Destination folder:D:\Shaheen\Mirror\Videos`
+Videos (23,0,0 ; 16,3,0)```  
+indicating that the first directory contains 23 regular files not in the second directory, 16 sub-dirs not in second directory, and 3 sub-dirs are common to both directories.
 
 **B. Copying:**
 `jeeva --copy mod Source Dest`  : copies regular files that are newer in Source. Files that are in Source but not in Dest are **not** copied. With `--recursive`, does same while descending tree structure. Never copies directory files.
