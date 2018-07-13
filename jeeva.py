@@ -11,13 +11,14 @@ SRTonse, Created: 28th March 2018
 Version_Number = ("1.0.0", "(3/28/2018)"):  Original version
 Version_Number = ("1.1.0", "(4/1/2018)"): Finessed the output
 Version_Number = ("1.2.4", "(4/14/2018)"): --jeeva option. Better handling of assert in ProcessInputOptsnArgs 
+Version_Number = ("1.3.6", "(7/9/2018)"): Removed --copy all
 
 
 
 -----------------End of Modifications-----------------
 """
 
-Version_Number = ("1.3.5", "(5/31/2018)")
+Version_Number = ("1.4.1", "(7/10/2018)")
 """   
 """
 
@@ -112,16 +113,14 @@ def DefineInputOptsnArgs(Version_Number_Date):
 
     copygroup = optparse.OptionGroup(CLOP,"Solely copy-related options")
     copygroup.add_option("--copy", action="store", dest="copyopt", type="string", default="",
-                    help="Copy files from source to dest. COPYOPT should be one of: all | newer | update. No default. \"all\" overwrites dest with source. \"newer\" copies regular files that are newer in source. Files that are in source but not in dest are not copied. \"update\" additionally copies those files, plus, if --mkdir option permits, directories are also created and copied.")
-    #CLOP.add_option("--copy", action="store", dest="copyopt", type="string", default="",
-    #                help="Copy files from source to dest. COPYOPT should be one of: all | newer | diff | nad (newer and different) | nod (newer or different). \"newer\" pertains to the source file being newer. Files that are in source but not in dest will be copied only if \"all\" is used.")
+                    help="Copy files from source to dest. COPYOPT should be one of: mod | update. No default. \"mod\" copies regular files that are newer in source. Files that are in source but not in dest are not copied. \"update\" additionally copies those files, plus, if --mkdir option permits, directories are also created and copied.")
+    #copygroup.add_option("--copy", action="store", dest="copyopt", type="string", default="",
+    #                help="Copy files from source to dest. COPYOPT should be one of: all | newer | update. No default. \"all\" overwrites dest with source. \"newer\" copies regular files that are newer in source. Files that are in source but not in dest are not copied. \"update\" additionally copies those files, plus, if --mkdir option permits, directories are also created and copied.")
     copygroup.add_option("--mkdir", action="store", dest="mkdir", type="string", default="query",
                     help="Create destination directory/folder if it does not exist. MKDIR should be one of: yes | no | query(default)")
     copygroup.add_option("--dryrun", action="store_true", dest="dryrun", default=False,
                     help='Test mode: Code will run without actually copying any files or changing anything. Only meaningful for --copy')
     CLOP.add_option_group(copygroup)
-    #CLOP.add_option("--log", action="store", dest="loglevel", type="string", default="INFO",
-    #                help="Specify logging verbosity level (DEBUG/ INFO(default)/ WARNING/ ERROR/ FATAL) on command line")
     return CLOP
 #----------------------------------------------------------------------------
 
@@ -131,16 +130,17 @@ def ProcessInputOptsnArgs(clop):
     opts,args = clop.parse_args()
     if opts.jeeva:
         S =\
-"""Why \"Jeeva\"?
-Jeeva was a \"goonda\" who terrorised everybody in my neighbourhood
-when I was a kid. An auto-rickshaw driver by profession. I saw
+"""Why \"Jeeva\"?\n
+In Sanskrit \"Jeeva\" roughly translates as: A living being | an entity imbued with a life force.
+But Jeeva was also the name of a \"goonda\" who terrorised everybody in my neighbourhood
+when I was a kid. He was an auto-rickshaw driver by profession. I saw
 him once take on 4 guys, viciously beating them up with a wrench, then
 lean against a wall, fold his arms and scream in his broken English,
-\"You bring friends? Go! Bring friends! I wait!\"
-Needless to say, his adversories just slunk away, figuring that one thrashing
-a day was plenty. Jeeva made a lasting impression on me, although 40 years
+\"You bring friends? Go! Bring friends! I vait!\"
+Needless to say, his adversories just slunk away, figuring that one sound thrashing
+a day was plenty. Jeeva made a lasting impression on me, even though 40 years
 have passed. This unique piece of software, (unique in that no other
-Python 2.x script has ever been named after a goonda autorickshaw driver)
+Python 2.x script has ever been named after a goonda autorickshaw driver,)
 is dedicated to his memory."""
         print S
         os._exit(0)
@@ -150,15 +150,7 @@ is dedicated to his memory."""
         assert os.path.exists(args[0]), "Source folder does not exist"
         assert os.path.isdir(args[0]), "Source folder is not a folder/directory"
         assert os.path.isdir(args[1]), "Destination folder is not a folder/directory"
-        """yesno = raw_input("Destination folder does not exist. Would you like to create it now? (Y/N)")
-                if yesno == "Y" or yesno == "y":
-                if opts.dryrun:
-                    print "Dryrun: os.mkdir(%s)" % args[1]
-                else:
-                    os.mkdir(args[1])
-                else:
-                assert False,"OK fine, whatever, exiting."
-        """
+
         #EGOF Exclusive OR
         assert (opts.compare and not opts.copyopt) or (not opts.compare and opts.copyopt),\
         "Either --compare or --copy required, not neither, not both. See help (-h)"
@@ -235,17 +227,12 @@ def CompareFolder(source, dest, opts, indent):
             (destnotsourceDir, "Dirs not in Source but in Destination folder:") )
             for t in T1:
                 if len(t[0]): PrintContent(t[0].copy(), t[1])
-            """if len(sourcenotdestReg): PrintContent(sourcenotdestReg.copy(), "Files in Source but not in Destination folder:")
-            if len(sourceanddestReg): PrintContent(sourceanddestReg.copy(), "File names common to Source and Destination folders:")
-            if len(destnotsourceReg):PrintContent(destnotsourceReg.copy(), "Files not in Source but in Destination folder:")
-            if len(sourcenotdestDir): PrintContent(sourcenotdestDir.copy(), "Dirs in Source but not in Destination folder:")
-            if len(sourceanddestDir): PrintContent(sourceanddestDir.copy(), "Dir names common to Source and Destination folders:")
-            if len(destnotsourceDir):PrintContent(destnotsourceDir.copy(), "Dirs not in Source but in Destination folder:")"""
+
         #See if a mask of y's and n's was given: Should be a 6 letter string consisting ONLY of Y and N, case-insenstive
         if len(opts.details) == 6:
             mask = opts.details.upper()
             d1 = Counter(mask)
-            if d1["Y"] + d1["N"] == 6:
+            if d1["Y"] + d1["N"] == 6:      #sum of number of Ys and Ns is 6. So must be a mask
                 T1 = ( (sourcenotdestReg, "Files in Source but not in Destination folder:"),
                 (sourceanddestReg, "File names common to Source and Destination folders:"),
                 (destnotsourceReg, "Files not in Source but in Destination folder:"),
@@ -254,16 +241,6 @@ def CompareFolder(source, dest, opts, indent):
                 (destnotsourceDir, "Dirs not in Source but in Destination folder:") )
                 for i in range(5):
                     if mask[i]=="Y" and len(T1[i][0]): PrintContent(T1[i][0].copy(), T1[i][1])
-                """"i += 1
-                if mask[i]=="Y" and len(sourceanddestReg): PrintContent(sourceanddestReg.copy(), "File names common to Source and Destination folders:")
-                i += 1
-                if mask[i]=="Y" and len(destnotsourceReg):PrintContent(destnotsourceReg.copy(), "Files not in Source but in Destination folder:")
-                i += 1
-                if mask[i]=="Y" and len(sourcenotdestDir): PrintContent(sourcenotdestDir.copy(), "Dirs in Source but not in Destination folder:")
-                i += 1
-                if mask[i]=="Y" and len(sourceanddestDir): PrintContent(sourceanddestDir.copy(), "Dir names common to Source and Destination folders:")
-                i += 1
-                if mask[i]=="Y" and len(destnotsourceDir):PrintContent(destnotsourceDir.copy(), "Dirs not in Source but in Destination folder:")"""
 
     #------------------------------------------------
     #indent is False on first call
@@ -332,7 +309,8 @@ def CopyFolder(source, dest, opts, indent):
     #---------------------------
 
     def CopyorDryrun(source, dest, fn, dryrun, indent):
-        """Do a copy of source/fn to dest/fn. If dryrun is true then just pretend to copy
+        """Do a copy of source/fn to dest/fn, where fn is filename.
+        If dryrun is true then just pretend to copy
         """
         if dryrun:
             print "%sDryrun: shutil.copyfile(%s, %s)" % (indent, os.path.join(source, fn), os.path.join(dest, fn))
@@ -349,7 +327,7 @@ def CopyFolder(source, dest, opts, indent):
     S_title = "%sSource folder:%s.   Destination folder:%s\n" % (indent, source, dest)
     #print indent, "Source folder:%s.   Destination folder:%s" % (source, dest)
     copyopt = opts.copyopt
-    if copyopt == "all":
+    """if copyopt == "all":
         if opts.recursive:
             if raw_input("Copying all files from Source to Dest.\n Will delete existing Dest folder %s and write new one.\n Continue? (YES/yes)" % dest).upper() == "YES":
                 import time
@@ -374,9 +352,9 @@ def CopyFolder(source, dest, opts, indent):
             print S_title, "Copied %d files" % icount
             S_title = ""
         return None           #no need to return set of dir files common to source and dest
-
+    """
     #For remaining options need more than merely file name, so use the Pathitem class as set member
-    elif copyopt == "newer" or copyopt == "update":
+    if copyopt == "mod" or copyopt == "update":
         #the following 4 sets are sets of Pathitems:
         set_sourcenotdestReg, set_sourceanddestReg, set_sourcenotdestDir, set_sourceanddestDir  = SetupSets(source, dest)
         
@@ -395,7 +373,7 @@ def CopyFolder(source, dest, opts, indent):
                 CopyorDryrun(source, dest, p.path, opts.dryrun, indent)
                 icount += 1
         if icount:
-            print S_title, indent, "Copied %d files that are newer in Source" % icount
+            print S_title, indent, "Copied %d files that have been modified in Source" % icount
             S_title = ""
         
         if copyopt == "update":
@@ -446,66 +424,6 @@ def CopyFolder(source, dest, opts, indent):
 
     return sourceanddestDir   #for use by calling routine Enter_dir to descend dir tree recursively
 
-    """OLD CODE: KEEP IN ASE WANT TO USE --DIFF EVER
-        elif copyopt == "newer" or copyopt == "diff" or copyopt == "nod" or copyopt == "nad":
-        set_sourcenotdestReg, set_sourceanddestReg, set_sourcenotdestDir, set_sourceanddestDir  = SetupSets(source, dest)
-
-        #first copy all the files in set_sourcenotdest, as no checking is required for those
-        icount = 0
-        for p in set_sourcenotdest:
-            CopyorDryrun(source, dest, p.path, opts.dryrun)
-            icount += 1
-        print "Copied %d files that were in Source but not in Dest" % icount
-        
-        #add mtimes or size in bytes to the PathItem for checking later
-        for p in set_sourceanddest:
-            sfn = os.path.join(source, p.path) #source file name
-            dfn = os.path.join(dest, p.path)   #dest file name
-            if copyopt == "newer" or copyopt == "nod" or copyopt == "nad":
-                p.s_mtime =  int(os.path.getmtime(sfn))
-                p.d_mtime =  int(os.path.getmtime(dfn))
-            if copyopt == "diff" or copyopt == "nod" or copyopt == "nad":
-                try:
-                    stats = os.stat(sfn)       #EGOF getting file details (size etc) with os.stat
-                    p.s_size = stats[6]
-                except:
-                    raise DirSizeError('Cannot stat %s'% p.path)
-                try:
-                    stats = os.stat(dfn)       #EGOF getting file details (size etc) with os.stat
-                    p.d_size = stats[6]
-                except:
-                    raise DirSizeError('Cannot stat %s'% p.path)
-        #actual copy/dryrun starts here
-        icount = 0
-        if copyopt == "newer":
-            print "Any files that are newer in source"
-            for p in set_sourceanddest:
-                if p.s_mtime > p.d_mtime:
-                    CopyorDryrun(source, dest, p.path, opts.dryrun)
-                    icount += 1
-        elif copyopt == "diff":
-            print "Any files that differ"
-            for p in set_sourceanddest:
-                if p.s_size != p.d_size:
-                    CopyorDryrun(source, dest, p.path, opts.dryrun)
-                    icount += 1
-        elif copyopt == "nod":
-            print "Any files that are newer or differ"
-            for p in set_sourceanddest:
-                if (p.s_mtime > p.d_mtime) or (p.s_size != p.d_size):
-                    CopyorDryrun(source, dest, p.path, opts.dryrun)
-                    icount += 1
-        elif copyopt == "nad":
-            print "Any files that are newer and differ"
-            for p in set_sourceanddest:
-                if (p.s_mtime > p.d_mtime) and (p.s_size != p.d_size):
-                    CopyorDryrun(source, dest, p.path, opts.dryrun)
-                    icount += 1
-        print "Copied %d files" % icount
-    else:
-        raise Exception("An invalid option following for --copy was given: %s" % copyopt)
-    return sourceanddestDir   #for use by calling routine Enter_dir to descend dir tree recursively
-    """
 
 #--------------------------------------------------------------------------
 def Enter_dir(source, dest, opts, indent):
@@ -516,8 +434,9 @@ def Enter_dir(source, dest, opts, indent):
         sourceanddestDir = CompareFolder(source, dest, opts, indent)
     elif opts.copyopt:
         sourceanddestDir = CopyFolder(source, dest, opts, indent)
-    if opts.copyopt == "all" or not opts.recursive:
+    if not opts.recursive:
         return
+    
 
     #recursive descent into directories
     for item in sourceanddestDir:
@@ -527,43 +446,6 @@ def Enter_dir(source, dest, opts, indent):
         destpath = os.path.join(dest, item)
         Enter_dir(sourcepath, destpath, opts, indent+INDENT_INCREMENT)
 
-    """try:
-        dir_list = os.listdir(source)
-    except:
-        # If source is a directory, we probably had permission problems
-        if os.path.isdir(source):
-            #the dir contents could not be list'ed. Store for possible display at end of running
-            L_listerrors.append(source)
-            return
-        else: # otherwise, just re-raise the error so that it propagates, as could be serious
-            raise
-    for item in dir_list:
-        # if item is a sub-directory, ensure that it exists, and that a corr item exists
-        # in the destination, and then go into it
-        sourcepath = os.path.join(source, item)
-        if os.path.isdir(sourcepath):
-            destpath = os.path.join(dest, item)
-            #if destpath exists and is a dir file, go ahead. If it does not exist and
-            #opts.mkdir permits, then create a new dir and go ahead and copy to it.
-            if os.path.exists(destpath) and os.path.isdir(destpath):
-                Enter_dir(sourcepath, destpath, opts, indent+INDENT_INCREMENT)
-            elif not os.path.exists(destpath) and opts.copyopt:
-                if opts.mkdir == "yes":
-                    if opts.dryrun:
-                        print "Dryrun: os.mkdir(%s)" % destpath
-                    else:
-                        os.mkdir(destpath)
-                elif opts.mkdir == "query":
-                    if raw_input("Destination folder %s does not exist. Would you like to create it now? (Y/N)" % destpath).upper == "Y":
-                        if opts.dryrun:
-                            print "Dryrun: os.mkdir(%s)" % destpath
-                        else:
-                            os.mkdir(destpath)
-                    else:
-                        print "OK fine, whatever, not creating."
-                if os.path.exists(destpath) and os.path.isdir(destpath):   #now it should exist
-                    Enter_dir(sourcepath, destpath, opts, indent+INDENT_INCREMENT)
-    """
     return
 #-------------------------------------------------------------------------------
 
