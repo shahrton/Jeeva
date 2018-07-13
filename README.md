@@ -48,4 +48,4 @@ Option `--dryrun` shows what action would be taken *without doing any actual cop
 ### Author:
 Shaheen Tonse
 ### License:
-This is simple software. There is no license, just take it.
+This is simple software, <500 lines, only imports os, shutil, optparse and collections. There is no license, just take it.
