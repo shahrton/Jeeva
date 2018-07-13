@@ -20,7 +20,7 @@ This is a file/directory utility useful for:
 With `--details d_option` option displays actual file names in these 6 categories. `d_option` must be one of "yes", "query" or a 6 character yes/no mask (e.g. "yyyyyy" or "ynynyn" or "nnnnnn") to select which of the 6 quantities you wish displayed.
 
 Example: `jeeva --compare .\Videos D:\Shaheen\Mirror\Videos` produces:  
-```Source folder:.\Videos        Destination folder:D:\Shaheen\Mirror\Videos`
+```Source folder:.\Videos        Destination folder:D:\Shaheen\Mirror\Videos
 Videos (23,0,0 ; 16,3,0)```  
 indicating that the first directory contains 23 regular files not in the second directory, 16 sub-dirs not in second directory, and 3 sub-dirs are common to both directories.  
 Adding `--recursive` produces similar output for the 3 sub-dirs that they have in common:  
