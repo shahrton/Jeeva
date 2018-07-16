@@ -38,7 +38,7 @@ Videos (23,0,0 ; 16,3,0)
 
 `jeeva --copy update Source Dest` : Similar to *mod* but additionally copies regular files that are in Source but not in Dest.  With `--recursive`, does same while descending tree structure. With `--recursive --mkdir yes` (or `--mkdir query`), additionally, directories that are in Source but not in Dest are created and copied along with their contents (shutil.copytree is used at the uppermost level here, so not to worry, you wil not have to laboriously descend the whole tree if you used `--mkdir query`).
 
-Both Source and Dest must exist beforehand and, rather than that I implement a `jeeva --copy all Source Dest`, use your OS's directory tree copying utility to initially create Dest. (MS Windows use `robocopy`. Linux/Unix/Apple use `cp -ar` or `cp -r`)
+Both Source and Dest must exist beforehand and, rather than that I implement a `jeeva --copy all Source Dest`, use your OS's directory tree copying utility to initially create Dest. (MS Windows use `xcopy` or `robocopy`. Linux/Unix/Apple use `cp -ar` or `cp -r`)
 
 Option `--dryrun` shows what action would be taken *without doing any actual copying*, to allow a check beforehand.
 
