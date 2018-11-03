@@ -8,6 +8,7 @@ This is a file/directory utility useful for:
 
 **B.** Mirroring directories, when called with **--copy**. Quick simple copy to another location with zero sophistication. Primarily useful for keeping a mirror on another hard drive or for frequent copying to a USB stick. Has a short copying time as allows one to selectively copy over to the destination directory *only those files* that are newer in source than in the destination directory; useful when the total number of files is large but the number of newer files is relatively small. 
 
+*nb*: There is a better documentation file at www.twentypede.com/leg4/jeeva1.4.html . Also there is a significant useful improvement that is not mentioned in the docs below.
 
 ### Detailed Description:
 **A. Compare:**
