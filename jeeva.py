@@ -12,14 +12,19 @@ Version_Number = ("1.0.0", "(3/28/2018)"):  Original version
 Version_Number = ("1.1.0", "(4/1/2018)"): Finessed the output
 Version_Number = ("1.2.4", "(4/14/2018)"): --jeeva option. Better handling of assert in ProcessInputOptsnArgs 
 Version_Number = ("1.3.6", "(7/9/2018)"): Removed --copy all
-
-
+Version_Number = ("1.4.3", "(10/14/2018)") 2 new options: --sroot and --droot. If one is there then the
+other has to be there, cannot just have one. Each has to be an existing folder. Execute Jeeva from
+a folder below (or equal to) --sroot; that folder is Source. Jeeva look for a folder of the same
+name and in a corresponding position below --droot. That will be Destination folder.
+It will then proceed as usual to do a compare or a copy.  
+Version_Number = ("1.4.4", "(10/16/2018)"): Minor bug: --details yyyyyy was not catching the 6th y.  
 
 -----------------End of Modifications-----------------
 """
 
-Version_Number = ("1.4.1", "(7/10/2018)")
+Version_Number = ("1.4.5", "(10/21/2018)")
 """   
+Minor bug: --mkdir NO causing exception
 """
 
 """ToDo:
@@ -80,6 +85,9 @@ class DirSizeError(Exception): pass       #EGOF nice, not ungainly, exception ex
 
 USAGE_MESSAGE = """
 python jeeva.py [options] source_folder destination_folder
+OR
+python jeeva.py [options] --sroot root_source_folder --droot root_destination_folder
+
 
 To be used for:
 A) Comparing 2 folders. No copying is done. Displays file names that
@@ -100,6 +108,10 @@ def DefineInputOptsnArgs(Version_Number_Date):
     """
     CLOP = optparse.OptionParser(version=Version_Number_Date,usage=USAGE_MESSAGE)     #command line options
     #EGOF Divide optparse into Option groups, easier to read Help
+    CLOP.add_option("--sroot", action="store", dest="source_root", default=False, type="string",
+                    help='Location of root source folder. Default = False')
+    CLOP.add_option("--droot", action="store", dest="dest_root", default=False, type="string",
+                    help='Location of root destination folder. Default = False')
     CLOP.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False,
                     help='Compare or Copy recursively down a directory structure. Default = False')
     CLOP.add_option("--jeeva", action="store_true", dest="jeeva", default=False,
@@ -127,30 +139,64 @@ def DefineInputOptsnArgs(Version_Number_Date):
 def ProcessInputOptsnArgs(clop):
     """Process the input command line opts and args
     """
+    def GetSourceDest(opts, args):
+        """Test the validity of the input args/opts related to Source/Dest folders and return the 
+        Source and Dest folder names 
+        """
+        try:
+            assert (len(args)==2 and not opts.source_root and not opts.dest_root) or (len(args)==0 and opts.source_root and opts.dest_root),\
+            "Either source/dest folder method OR root source/root dest method should be used, but not both.\
+            \n Either specify Source and Destination folders as arguments or\
+            \nroot Source and root Destination folders using --sroot and --droot respectively."
+            if len(args)==2:
+                source, dest = args      #using source/dest method
+            else:
+                #using root source/root dest method
+                assert os.path.exists(opts.source_root), "Root Source folder does not exist"
+                assert os.path.isdir(opts.source_root), "Root Source folder is not a folder/directory"
+                assert os.path.exists(opts.dest_root), "Root Destination folder does not exist"
+                assert os.path.isdir(opts.dest_root), "Root Destination folder is not a folder/directory"
+                #get current location
+                source = os.path.abspath(os.curdir)
+                #get current location wrt root source
+                opts.source_root = os.path.abspath(opts.source_root)
+                rel_to_source = os.path.relpath(source, opts.source_root)
+                print "source, opts.source_root, rel_to_source", source, opts.source_root, rel_to_source
+                #get destination location wrt root dest
+                dest = os.path.join(opts.dest_root, rel_to_source)
+                print dest
+                assert os.path.exists(dest), "Destination folder (%s) does not exist" % dest
+                assert os.path.isdir(dest), "Destination folder (%s) is not a folder/directory" % dest
+            return source, dest
+        except AssertionError, X:
+            print X
+            os._exit(1)
+    #------------------------
+        
     opts,args = clop.parse_args()
     if opts.jeeva:
         S =\
 """Why \"Jeeva\"?\n
-In Sanskrit \"Jeeva\" roughly translates as: A living being | an entity imbued with a life force.
-But Jeeva was also the name of a \"goonda\" who terrorised everybody in my neighbourhood
-when I was a kid. He was an auto-rickshaw driver by profession. I saw
-him once take on 4 guys, viciously beating them up with a wrench, then
-lean against a wall, fold his arms and scream in his broken English,
-\"You bring friends? Go! Bring friends! I vait!\"
-Needless to say, his adversories just slunk away, figuring that one sound thrashing
-a day was plenty. Jeeva made a lasting impression on me, even though 40 years
-have passed. This unique piece of software, (unique in that no other
-Python 2.x script has ever been named after a goonda autorickshaw driver,)
-is dedicated to his memory."""
+In Sanskrit \"Jeeva\" roughly translates as:
+"a living being" or "an entity imbued with a life force".
+Jeeva also hapened to be the name of a \"goonda\" who terrorised everybody
+in my neighbourhood when I was a kid. He was an auto-rickshaw driver by
+profession. I saw him once take on 4 guys, viciously beating them up with
+a spanner (a wrench), then lean against a wall, fold his arms and scream
+in his broken English,\"You bring friends? Go! Bring friends! I vait!\"
+Needless to say, his adversories just slunk away, figuring that one sound
+thrashing a day was a-plenty. Jeeva made a lasting impression on me, even
+though 40 years have passed.
+This unique piece of software, unique in that no other Python 2.x script
+has ever been named after a goonda autorickshaw driver, is dedicated to
+his memory."""
         print S
         os._exit(0)
-    #test of validity of input opts/args
+    #Test the validity of the input args/opts related to Source/Dest folders and return the 
+    #Source and Dest folder names
+    source, dest = GetSourceDest(opts, args)
+    #print source, dest
     try:  #EGOF use AssertionError exception to quickly jump out of program
-        assert len(args) == 2, "Exactly 2 args, a source folder and a destination folder are required. Exiting."
-        assert os.path.exists(args[0]), "Source folder does not exist"
-        assert os.path.isdir(args[0]), "Source folder is not a folder/directory"
-        assert os.path.isdir(args[1]), "Destination folder is not a folder/directory"
-
         #EGOF Exclusive OR
         assert (opts.compare and not opts.copyopt) or (not opts.compare and opts.copyopt),\
         "Either --compare or --copy required, not neither, not both. See help (-h)"
@@ -168,7 +214,8 @@ is dedicated to his memory."""
     except:
         raise             #twas some other type of exception
 
-    return opts, args[0], args[1]
+    return opts, source, dest
+    #return opts, args[0], args[1]
 #--------------------------------------------------------------------------
 
 def SetOfRegFiles(dir1):
@@ -201,13 +248,12 @@ def SetOfDirFiles(dir1):
 
 def CompareFolder(source, dest, opts, indent):
     """A folder to folder comparison, displaying number of files (or file names)
-        that are in either
-        one or the other folder, or in both folders. User can decide with CL args
-        what level of detail to output with --details
+        that are in either one or the other folder, or in both folders. User
+        can decide with CL args what level of detail to output with --details
     """
     def Print_Details(sourcenotdestReg, sourceanddestReg, destnotsourceReg,
                       sourcenotdestDir, sourceanddestDir, destnotsourceDir, opts, indent):
-        """Print details if and at level the user has requested with --details
+        """Print details if and at level of detail the user has requested with --details
         """
         def PrintContent(S_in, title):
             """Print in comma sep form. S_in=set() of file names. title=string
@@ -239,7 +285,7 @@ def CompareFolder(source, dest, opts, indent):
                 (sourcenotdestDir, "Dirs in Source but not in Destination folder:"),
                 (sourceanddestDir, "Dir names common to Source and Destination folders:"),
                 (destnotsourceDir, "Dirs not in Source but in Destination folder:") )
-                for i in range(5):
+                for i in range(6):
                     if mask[i]=="Y" and len(T1[i][0]): PrintContent(T1[i][0].copy(), T1[i][1])
 
     #------------------------------------------------
@@ -324,35 +370,9 @@ def CopyFolder(source, dest, opts, indent):
     #Whole funny business with S_title is because I do not want to print it unless some
     #specific action occured. Otherwise the output is too verbose and conists mainly of
     #meaningless S_titles
-    S_title = "%sSource folder:%s.   Destination folder:%s\n" % (indent, source, dest)
+    S_title = "%sSource folder:%s.   Destination folder:%s" % (indent, source, dest)
     #print indent, "Source folder:%s.   Destination folder:%s" % (source, dest)
     copyopt = opts.copyopt
-    """if copyopt == "all":
-        if opts.recursive:
-            if raw_input("Copying all files from Source to Dest.\n Will delete existing Dest folder %s and write new one.\n Continue? (YES/yes)" % dest).upper() == "YES":
-                import time
-                if opts.dryrun:
-                    print S_title, "Dryrun: shutil.rmtree(%s)" % dest
-                    S_title = ""
-                    print "sleeping 2 secs"
-                    time.sleep(2)     #necessary otherwise the rmtree is not regsitered with Windows OS!
-                    print "Dryrun: shutil.copytree(%s, %s)" % (source, dest)
-                else:
-                    shutil.rmtree(dest)
-                    time.sleep(2)     #necessary otherwise the rmtree is not regsitered with Windows OS!
-                    shutil.copytree(source, dest)
-            else:
-                os._exit(0)
-        else:
-            set_source = SetOfRegFiles(source)       #set of file names in Source folder
-            icount = 0
-            for f in set_source:
-                CopyorDryrun(source, dest, f, opts.dryrun, indent)
-                icount += 1
-            print S_title, "Copied %d files" % icount
-            S_title = ""
-        return None           #no need to return set of dir files common to source and dest
-    """
     #For remaining options need more than merely file name, so use the Pathitem class as set member
     if copyopt == "mod" or copyopt == "update":
         #the following 4 sets are sets of Pathitems:
@@ -394,11 +414,12 @@ def CopyFolder(source, dest, opts, indent):
                     sourcepath = os.path.join(source, p.path)
                     destpath = os.path.join(dest, p.path)
                     assert not os.path.exists(destpath), "%s should not exist" % destpath
-                    if opts.mkdir == "yes":
+                    do_copytree = False
+                    if (opts.mkdir).lower() == "yes":
                         do_copytree = True
-                    elif opts.mkdir == "no":
+                    elif (opts.mkdir).lower() == "no":
                         do_copytree = False
-                    elif opts.mkdir == "query":
+                    elif (opts.mkdir).lower() == "query":
                         do_copytree = raw_input("%sDestination folder %s does not exist. Would you like to create it now? (Y/N)" % (S_title, destpath)).upper() == "Y"
                         S_title = ""
                     if do_copytree:
@@ -457,7 +478,7 @@ if opts.dryrun: print "Dryrun option is ON. NO actual copying will occur"
 #Most work done here
 indent = ""
 Enter_dir(source, dest, opts, indent)
-
+print "\n"
 # finally, write out names of dirs that gave a problem
 L_listerrors = set(L_listerrors)    #remove duplicate entries:
 if len(L_listerrors):     #EGOF handling a raw_input yesno in one line, testing for uppercase Y
