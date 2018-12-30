@@ -18,13 +18,17 @@ a folder below (or equal to) --sroot; that folder is Source. Jeeva look for a fo
 name and in a corresponding position below --droot. That will be Destination folder.
 It will then proceed as usual to do a compare or a copy.  
 Version_Number = ("1.4.4", "(10/16/2018)"): Minor bug: --details yyyyyy was not catching the 6th y.  
+Version_Number = ("1.4.5", "(10/21/2018)"): Minor bug: --mkdir NO causing exception. Fixed by
+lowercasing the option.
 
 -----------------End of Modifications-----------------
 """
 
-Version_Number = ("1.4.5", "(10/21/2018)")
+Version_Number = ("1.5.1", "(12/22/2018)")
 """   
-Minor bug: --mkdir NO causing exception
+Improve quality and readability of output for both compare and copy
+Add --depth option for the --compare option only: Only compares d levels down the tree,
+--recursive is unnecessary if this is used. 
 """
 
 """ToDo:
@@ -38,6 +42,7 @@ How to handle Shortcuts?
 Threads? say 3 or 4? Only necessary if doing md5sum, using hashlib.md5,
 currently I just use file size to determine if they are different, which
 is not great.
+New option -c for color. 
 """
 import os
 import optparse
@@ -48,6 +53,9 @@ from printindentwidth import PrintIndentWidth
 #used for formatting of output for --compare
 INDENT_INCREMENT = "   "
 INDENT_ARROW = "|->"
+WIDTH_PRINTINDENTWIDTH = 65      #change this if want to narrow/widen output field for the --compare output
+
+max_depth_reached = -1
 
 L_listerrors = list()    #to contain names of any directories that could not be list'ed
 
@@ -92,13 +100,13 @@ python jeeva.py [options] --sroot root_source_folder --droot root_destination_fo
 To be used for:
 A) Comparing 2 folders. No copying is done. Displays file names that
    are in either one or the other or both folders.
-   Display consists of 6 numbers:
+   The 6 numbers displayed after each folder name are:
    1) # regular files in source folder but not destination folder
    2) # in both source and dest
    3) # in dest but not source, 
-   4,5,6) the same 3 corresponding values but for directories/folders")
+   4,5,6) the same 3 corresponding values but for directories/folders
 
-B) Mirroring folders. Quick copy to backup with zero sophistication.
+B) Mirroring folders. Quick copy for backing up with zero sophistication.
 Allows one to selectively copy over to the destination folder only those files
 that are newer in source than in the destination folder. Can recursively descend directory tree 
 """
@@ -116,22 +124,26 @@ def DefineInputOptsnArgs(Version_Number_Date):
                     help='Compare or Copy recursively down a directory structure. Default = False')
     CLOP.add_option("--jeeva", action="store_true", dest="jeeva", default=False,
                     help='A little trivia on why it is called Jeeva')
+    
     compare = optparse.OptionGroup(CLOP,"Solely compare-related options")
     compare.add_option("--compare", action="store_true", dest="compare", default=False,
-                    help="Compare contents of source and destination folders. No copying is done. See docs above. ")
+                    help="Compare contents of source and destination folders. No copying is done. See description earlier. ")
     compare.add_option("--details", action="store", dest="details", type="string", default="no",
-                    help="Detailed output showing filenames for --compare. DETAILS should be one of: yes | no (default) | query | or a mask e.g. \"nynyny\" where each y/n (yes/no) corresponds to the 6 values described above for --compare")
+                    help="Detailed output showing filenames for --compare. DETAILS should be one of: yes | no (default) | query | or a mask e.g. \"nynyny\" where each y/n (yes/no) corresponds to the 6 values described earlier for comparing")
+    compare.add_option("-d", "--depth", action="store", type="int", dest = "depth", default=False,
+                    help="Limit the # of directory-levels down for --compare display. --recursive unnecessary if this used")
     CLOP.add_option_group(compare)           #EGOF using option groups in optparse module
 
+
     copygroup = optparse.OptionGroup(CLOP,"Solely copy-related options")
-    copygroup.add_option("--copy", action="store", dest="copyopt", type="string", default="",
+    copygroup.add_option("--copy", action="store", dest="copyopt", type="string", default=False,
                     help="Copy files from source to dest. COPYOPT should be one of: mod | update. No default. \"mod\" copies regular files that are newer in source. Files that are in source but not in dest are not copied. \"update\" additionally copies those files, plus, if --mkdir option permits, directories are also created and copied.")
     #copygroup.add_option("--copy", action="store", dest="copyopt", type="string", default="",
     #                help="Copy files from source to dest. COPYOPT should be one of: all | newer | update. No default. \"all\" overwrites dest with source. \"newer\" copies regular files that are newer in source. Files that are in source but not in dest are not copied. \"update\" additionally copies those files, plus, if --mkdir option permits, directories are also created and copied.")
     copygroup.add_option("--mkdir", action="store", dest="mkdir", type="string", default="query",
                     help="Create destination directory/folder if it does not exist. MKDIR should be one of: yes | no | query(default)")
     copygroup.add_option("--dryrun", action="store_true", dest="dryrun", default=False,
-                    help='Test mode: Code will run without actually copying any files or changing anything. Only meaningful for --copy')
+                    help='Test mode: Code will run without actually copying any files or changing anything.')
     CLOP.add_option_group(copygroup)
     return CLOP
 #----------------------------------------------------------------------------
@@ -161,10 +173,10 @@ def ProcessInputOptsnArgs(clop):
                 #get current location wrt root source
                 opts.source_root = os.path.abspath(opts.source_root)
                 rel_to_source = os.path.relpath(source, opts.source_root)
-                print "source, opts.source_root, rel_to_source", source, opts.source_root, rel_to_source
+                #print "source, opts.source_root, rel_to_source", source, opts.source_root, rel_to_source
                 #get destination location wrt root dest
                 dest = os.path.join(opts.dest_root, rel_to_source)
-                print dest
+                #print dest
                 assert os.path.exists(dest), "Destination folder (%s) does not exist" % dest
                 assert os.path.isdir(dest), "Destination folder (%s) is not a folder/directory" % dest
             return source, dest
@@ -179,14 +191,15 @@ def ProcessInputOptsnArgs(clop):
 """Why \"Jeeva\"?\n
 In Sanskrit \"Jeeva\" roughly translates as:
 "a living being" or "an entity imbued with a life force".
+
 Jeeva also hapened to be the name of a \"goonda\" who terrorised everybody
 in my neighbourhood when I was a kid. He was an auto-rickshaw driver by
 profession. I saw him once take on 4 guys, viciously beating them up with
-a spanner (a wrench), then lean against a wall, fold his arms and scream
+a spanner (wrench), lean against a wall, fold his arms and scream
 in his broken English,\"You bring friends? Go! Bring friends! I vait!\"
 Needless to say, his adversories just slunk away, figuring that one sound
-thrashing a day was a-plenty. Jeeva made a lasting impression on me, even
-though 40 years have passed.
+thrashing a day was a-plenty. Jeeva has made a lasting impression on me, even
+after the passage of 40 years.
 This unique piece of software, unique in that no other Python 2.x script
 has ever been named after a goonda autorickshaw driver, is dedicated to
 his memory."""
@@ -201,6 +214,14 @@ his memory."""
         assert (opts.compare and not opts.copyopt) or (not opts.compare and opts.copyopt),\
         "Either --compare or --copy required, not neither, not both. See help (-h)"
         
+        #Handle the --depth option.
+        #Must only be used with --compare
+        assert not (opts.copyopt and opts.depth),"--depth option only permitted with --compare option"
+        #and if present, go ahead and turn on the --recursive option even if latter was not explcitly turned on
+        if opts.depth:
+            opts.recursive = True
+        depth = opts.depth
+        
         #check that --details options are OK       
         Odu = opts.details.upper()
         #possible that a 6-char mask consisting eg of "ynynny" was input
@@ -214,8 +235,7 @@ his memory."""
     except:
         raise             #twas some other type of exception
 
-    return opts, source, dest
-    #return opts, args[0], args[1]
+    return opts, source, dest, depth
 #--------------------------------------------------------------------------
 
 def SetOfRegFiles(dir1):
@@ -258,19 +278,19 @@ def CompareFolder(source, dest, opts, indent):
         def PrintContent(S_in, title):
             """Print in comma sep form. S_in=set() of file names. title=string
             """
-            print indent, title
-            PrintIndentWidth(S_in, len(indent), width=65)
+            print indent, title,  "\n",  indent, "-"*len(title)
+            PrintIndentWidth(S_in, len(indent), width=WIDTH_PRINTINDENTWIDTH)
         #------------------------------
         print_detail = (opts.details == "yes")
         if opts.details == "query":
             print_detail = raw_input(indent+"List the actual filenames? (Y/y)").upper() == "Y"
         if print_detail:
-            T1 = ( (sourcenotdestReg, "Files in Source but not in Destination folder:"),
-            (sourceanddestReg, "File names common to Source and Destination folders:"),
-            (destnotsourceReg, "Files not in Source but in Destination folder:"),
-            (sourcenotdestDir, "Dirs in Source but not in Destination folder:"),
-            (sourceanddestDir, "Dir names common to Source and Destination folders:"),
-            (destnotsourceDir, "Dirs not in Source but in Destination folder:") )
+            T1 = ( (sourcenotdestReg, "FILES IN SOURCE ONLY:"),
+            (sourceanddestReg, "FILES COMMON TO BOTH:"),
+            (destnotsourceReg, "FILES IN DESTINATION ONLY:"),
+            (sourcenotdestDir, "DIRS IN SOURCE ONLY:"),
+            (sourceanddestDir, "DIRS COMMON TO BOTH:"),
+            (destnotsourceDir, "DIRS IN DESTINATION ONLY:") )
             for t in T1:
                 if len(t[0]): PrintContent(t[0].copy(), t[1])
 
@@ -279,18 +299,18 @@ def CompareFolder(source, dest, opts, indent):
             mask = opts.details.upper()
             d1 = Counter(mask)
             if d1["Y"] + d1["N"] == 6:      #sum of number of Ys and Ns is 6. So must be a mask
-                T1 = ( (sourcenotdestReg, "Files in Source but not in Destination folder:"),
-                (sourceanddestReg, "File names common to Source and Destination folders:"),
-                (destnotsourceReg, "Files not in Source but in Destination folder:"),
-                (sourcenotdestDir, "Dirs in Source but not in Destination folder:"),
-                (sourceanddestDir, "Dir names common to Source and Destination folders:"),
-                (destnotsourceDir, "Dirs not in Source but in Destination folder:") )
+                T1 = ( (sourcenotdestReg, "FILES IN SOURCE ONLY:"),
+                       (sourceanddestReg, "FILES COMMON TO BOTH:"),
+                       (destnotsourceReg, "FILES IN DESTINATION ONLY:"),
+                       (sourcenotdestDir, "DIRS IN SOURCE ONLY:"),
+                       (sourceanddestDir, "DIRS COMMON TO BOTH:"),
+                       (destnotsourceDir, "DIRS IN DESTINATION ONLY:") )
                 for i in range(6):
                     if mask[i]=="Y" and len(T1[i][0]): PrintContent(T1[i][0].copy(), T1[i][1])
 
     #------------------------------------------------
     #indent is False on first call
-    if not bool(indent): print "Source folder:%s        Destination folder:%s" % (source, dest)
+    if not bool(indent): print "Source folder:%s        Destination folder:%s" % (source, dest)  #only do at top-level
 
     set_source = SetOfRegFiles(source)      #set of files in Source folder
     set_dest = SetOfRegFiles(dest)      #set of files in Destination folder
@@ -331,7 +351,7 @@ def CopyFolder(source, dest, opts, indent):
         """Setup sets of Pathitem instances for the source dir and dest
         for regular and dir files
         For regular files and for directory files, return a set of files
-        in Source but not Dest and a set of files in Source AND in Dest
+        in Source but not Dest, and a set of files in Source AND in Dest
         """
         #regular files
         set_sReg = SetOfRegFiles(s) 
@@ -359,7 +379,8 @@ def CopyFolder(source, dest, opts, indent):
         If dryrun is true then just pretend to copy
         """
         if dryrun:
-            print "%sDryrun: shutil.copyfile(%s, %s)" % (indent, os.path.join(source, fn), os.path.join(dest, fn))
+            #print "%sDryrun: shutil.copyfile(%s, %s)" % (indent, os.path.join(source, fn), os.path.join(dest, fn))
+            pass
         else:
             try:
                 shutil.copyfile(os.path.join(source, fn), os.path.join(dest, fn))
@@ -370,7 +391,12 @@ def CopyFolder(source, dest, opts, indent):
     #Whole funny business with S_title is because I do not want to print it unless some
     #specific action occured. Otherwise the output is too verbose and conists mainly of
     #meaningless S_titles
-    S_title = "%sSource folder:%s.   Destination folder:%s" % (indent, source, dest)
+    #S_title = "%sSource folder:%s.   Destination folder:%s" % (indent, source, dest)
+    S_title = "%sSOURCE:%s.   DESTINATION:%s" % (indent, source, dest)
+    #Add a row of underscores above it for clearer display and put whole thing back into S_title
+    len_underscores = min(len(S_title),50)     #EGOF putting a underscore or minus sign underline
+    S_title = "%s%s\n%s" % (indent, len_underscores*"_",S_title)   #EGOF repetitive char in string
+
     #print indent, "Source folder:%s.   Destination folder:%s" % (source, dest)
     copyopt = opts.copyopt
     #For remaining options need more than merely file name, so use the Pathitem class as set member
@@ -393,7 +419,8 @@ def CopyFolder(source, dest, opts, indent):
                 CopyorDryrun(source, dest, p.path, opts.dryrun, indent)
                 icount += 1
         if icount:
-            print S_title, indent, "Copied %d files that have been modified in Source" % icount
+            #print S_title, indent, "Copied %d files that have been modified in Source" % icount
+            print S_title, indent, "COPIED %d MODIFIED FILES" % icount
             S_title = ""
         
         if copyopt == "update":
@@ -405,7 +432,8 @@ def CopyFolder(source, dest, opts, indent):
                 CopyorDryrun(source, dest, p.path, opts.dryrun, indent)
                 icount += 1
             if icount:
-                print S_title, indent, "Copied %d files that were in Source but not in Dest" % icount
+                #print S_title, indent, "Copied %d files that were in Source but not in Dest" % icount
+                print S_title, indent, "COPIED %d NEW FILES" % icount
                 S_title = ""
             
             if opts.recursive:
@@ -447,10 +475,15 @@ def CopyFolder(source, dest, opts, indent):
 
 
 #--------------------------------------------------------------------------
-def Enter_dir(source, dest, opts, indent):
+def Enter_dir(source, dest, opts, indent, start_depth=0, max_depth=0):
     """ Get a list and size of all names of files and subdirectories in directory source
         Recursively go down
     """
+    global max_depth_reached
+    if (max_depth and (start_depth > max_depth)):  #do not do if --depth is being used and have surpassed limit
+        return 
+    max_depth_reached = max(start_depth, max_depth_reached)
+
     if opts.compare:
         sourceanddestDir = CompareFolder(source, dest, opts, indent)
     elif opts.copyopt:
@@ -465,20 +498,30 @@ def Enter_dir(source, dest, opts, indent):
         # in the destination, and then go into it
         sourcepath = os.path.join(source, item)
         destpath = os.path.join(dest, item)
-        Enter_dir(sourcepath, destpath, opts, indent+INDENT_INCREMENT)
+        Enter_dir(sourcepath, destpath, opts, indent+INDENT_INCREMENT, start_depth+1, max_depth)
 
     return
 #-------------------------------------------------------------------------------
 
 #--------------------------------------- main -----------------------------------
 CLOP = DefineInputOptsnArgs(Version_Number[0]+Version_Number[1])  #Define the input command line opts and args. 
-opts, source, dest = ProcessInputOptsnArgs(CLOP)
+opts, source, dest, depth = ProcessInputOptsnArgs(CLOP)
 if opts.dryrun: print "Dryrun option is ON. NO actual copying will occur"
 
 #Most work done here
 indent = ""
-Enter_dir(source, dest, opts, indent)
-print "\n"
+Enter_dir(source, dest, opts, indent, 0, depth)
+
+print "\n"          #do some depth reporting
+if depth:
+    if max_depth_reached < depth:
+        print "Was only necessary to go down %i levels. --depth %i was requested." % (max_depth_reached, depth)
+    else:
+        print "Went down %i levels as per -depth request." % (max_depth_reached)
+else:
+    if opts.recursive:
+        print "Went down %i levels --recursively." % (max_depth_reached)
+
 # finally, write out names of dirs that gave a problem
 L_listerrors = set(L_listerrors)    #remove duplicate entries:
 if len(L_listerrors):     #EGOF handling a raw_input yesno in one line, testing for uppercase Y
