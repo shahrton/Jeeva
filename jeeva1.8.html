@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Jeeva 1.8 Manual</title>
+  <meta name="author" content="Shaheen Tonse" />
+  <meta name="copyright" content="This document has been placed in the public domain." />
+  <link rel="stylesheet" href="default.css" type="text/css" />
+  <!--EGOF font defined by embedded style sheet-->
+  <!--EGOF customized tag names defined in embedded style sheet-->
+  <style type="text/css">
+    cour {font-family: Courier;}
+    tech {color: green}
+  </style>
+</head>
+
+<body>
+<div class="document" id="jeeva-manual">
+  <h1 class="title">Jeeva Manual</h1>
+  <p>A command-line based file/folder utility useful for comparing directories/folders or mirroring directories/folders.</p>
+  <br></br>
+
+    <table class="docinfo">
+      <col class="docinfo-name" />
+      <col class="docinfo-content" />
+      <tbody valign="top">
+	<tr><th class="docinfo-name">Version:</th>
+	  <td>Jeeva 1.8</td></tr>
+	<tr class="field"><th class="docinfo-name">Homepage:</th><td class="field-body"><a class="reference external" href="http://www.twentypede.com/leg4/jeeva1.6.html">http://www.twentypede.com/leg4/jeeva1.6.html</a></td>
+	</tr>
+	<tr><th class="docinfo-name">Author:</th>
+	  <td>Shaheen Tonse</td></tr>
+	<tr><th class="docinfo-name">Contact:</th>
+	  <td><a class="first last reference external" href="mailto:software@twentypede.com">software&#64;twentypede.com</a></td></tr>
+	<tr class="field"><th class="docinfo-name">Source URL:</th><td class="field-body"><a class="reference external" href="https://sourceforge.net/projects/jeeva-folder-utility/files/JeevaSource_1.6.2.zip/download">https://sourceforge.net/projects/jeeva-folder-utility/files/JeevaSource_1.6.2.zip/download (mainly for benefit of MS Windows users)</a></td></tr>
+	<tr><th class="docinfo-name">Copyright:</th>
+	  <td>This document has been placed in the public domain.</td></tr>
+      </tbody>
+    </table>
+    
+    <div id="contents">
+      <h1>Contents</h1>
+      <p><font size=-1><i>nb: After clicking on a topic, if you click on that header, it will bring you back here.</i></font></p>
+      <ul class="simple">
+	<li><a class="reference internal" href="#overview-what-jeeva-does" id="id11">Overview</a></li>
+	<li><a class="reference internal" href="#license" id="id3">License</a></li>
+	<li><a class="reference internal" href="#requirements" id="id2">Requirements</a></li>
+	<li><a class="reference internal" href="#installing-jeeva" id="id5">Installing</a>
+	  <ul>
+	    <li><a class="reference internal" href="#installing-in-linux_unix_apple" id="id6">Installing in Linux, Unix or Apple</a></li>
+	    <li><a class="reference internal" href="#installing-in-windows" id="id7">Installing in MS Windows</a></li>
+	  </ul>
+	</li>
+	
+	<li><a class="reference internal" href="#upgrading-jeeva" id="id10">Upgrading Jeeva</a></li>
+	<li><a class="reference internal" href="#using-jeeva" id="id18">Using Jeeva</a></li>
+
+	<li><a class="reference internal" href="#assorted-topics" id="id54">Assorted Topics</a>
+	  <ul>
+	    <li><a class="reference internal" href="#customization" id="id23">Customization</a></li>
+	    <li><a class="reference internal" href="#file-descriptions" id="id55">File Descriptions</a></li>
+	  </ul>
+	</li>
+	<li><a class="reference internal" href="#release-notes" id="id70">Release Notes &amp SHA256SUMS</a></li>
+	<li><a class="reference internal" href="#outdated-features" id="id84">Outdated Features</a></li>
+	<li><a class="reference internal" href="#acknowledgements" id="id90">Acknowledgements</a></li>
+      </ul>
+    </div>    <!--End of the Contents Section-->
+    
+    <!--                                  Start of the Main body                                    -->
+      
+    <!--                          --------------------Overview-------------------          -->
+    <div class="section" id="overview-what-jeeva-does">
+      <h1><a class="toc-backref" href="#id11">Overview</a></h1>
+      <p><center>This section applies to all platforms. (when you see text <tech title="for a more detailed description">this</tech> color, hover your mouse over it.)</center></p>
+      <p>This is a file/folder utility callable from the command line, e.g.:  <cour>jeeva [options] folder1 folder2</cour></p>
+      <p>When called with option
+	<dl>
+	  <dt>--overlap</dt><dd> (was --compare) Compares 2 folders or folder trees. Returns the number (and optionally the names) of files that are in one or the other folder, or common to both. A read-only operation, no copying is done. Can recursively descend (optionally to a specifed depth) down the folder tree. Does not yet compare the actual file contents or look at modification dates, but these features will be added late 2019/early 2020. </dd>
+	  <dt>--mtime</dt><dd>Compares 2 folders or folder trees. Returns the number (and optionally the names) of files that are newer, the same age, or older in folder1 vs folder2. Can recursively descend (optionally to a specifed depth) down the folder tree.</dd>
+	  <dt>--copy</dt><dd> used for mirroring folders, primarily useful for keeping a mirror on another hard drive or for frequent copying to a USB stick. Has a short copying time as allows one to selectively copy over to the destination folder only those files that are newer in source than in the destination folder; useful when the total number of files is large but the number of newer files is relatively small.</dd>
+      </dl></p>
+      <p>For any of the above options one can either:
+	    <ul>
+	      <li>specify the <cour>Source</cour> and <cour>Destination</cour> folders or</li>
+	      <li>specify 2 folders that we refer to as the <tech title="The choice for folders called the roots are up to the user, they do not (necessarily) mean the root of the filesystem or the user's account">roots</tech> of the <cour>Source</cour> and <cour>Destination</cour> folder systems, and then run Jeeva from a folder somewhere below the source root. In this case Jeeva will take <i>that</i> folder to be the source, will look for a folder of the same name and in a corresponding position below the destination root, and define that to be the Destination folder. It shall then proceed as usual to copy or compare.</li></ul></p>
+    </div>
+    
+    <!--                          --------------------License-------------------          -->
+    <div class="section" id="license">
+      <h1><a class="toc-backref" href="#id3">License</a></h1>
+      <p>This is simple software, ~900 lines, only imports the Python modules: <cour>sys, os, shutil, optparse, datetime</cour> and <cour>collections</cour>. It is free and distributed without warranty. Apache License 2.0 applies, please read, (http://www.apache.org/licenses/LICENSE-2.0) especially if you plan to re-distribute. See the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.</a> for the specific language governing permissions and limitations under the License.</p>
+      <p>Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an <b>"AS IS"</b> BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</p>
+    </div>
+    
+    <!--                          --------------------Requirements-------------------          -->
+    <div class="section" id="requirements">
+      <h1><a class="toc-backref" href="#id2">Requirements</a></h1>
+      <dl class="docutils">
+	<dt><strong>Python</strong></dt><dd>
+	  <ul>
+	    <li>Jeeva is written in Python. However MS Windows users do not necessarily have to install Python.</li>
+	    <li>Mac OSX, Linux and Unix users: your computer almost certainly has Python (if your OS is newer than Mac OSX 10.3) but if you want to verify: Open a command line window, Terminal or iTerm, (called a console or Xterm for Linux/Unix users). Type <cour>python --version</cour>. As long as the version is later than 2.5 you should have no problem. If you see "3.x.x" you <i>have</i> Python but unfortunately it is Python 3, and the software is not written for Python 3 yet, expect around Feb 2020.</li>
+	    <li>MS Windows users: You might already have Python, or you might wish to install it, or you could try using the the pre-built Jeeva binary/executable provided (created using the <cour>PyInstaller</cour> software utility), for which you will not need to install Python on your computer.</li>
+	  </ul>
+	</dd>
+      </dl>
+    </div>
+
+    <!--                          --------------------Installing-------------------          -->
+    <div class="section" id="installing-jeeva">
+      <h1><a class="toc-backref" href="#id5">Installing <cite>Jeeva</cite></a></h1>
+      <p><b>Linux, Unix, MAC OSX and MS Windows+Python users</b> use similar installation instructions since they use the Python interpreter already on their computer to interpret the source code. MS Windows no-Python instructions are different since pre-compiled executable is provided.</p>
+      <p><b>MS Windows no-Python users</b> who so desire can look at the source code (link provided at top of ths doc). This has extra CR/LFs inserted to make viewing in Windows Notepad easier. Other users get source code anyway.</p>
+
+      <div class="section" id="installing-in-linux_unix_apple">
+	<h2><a class="toc-backref" href="#id6">Installing in Linux, Unix or Mac OS X</a></h2>
+	<p><a href="https://sourceforge.net/projects/jeeva-folder-utility/">Download</a> either the zip or the tar file, which you will find after clicking on the <cour>Files</cour> tab on that page. <tech title="Use 'unzip zipfilename'">unzip</tech> or <tech title="Use 'tar -xvf tarfilename'">un-tar</tech> the downloaded file into its own folder, which you will find to contain <a href="#file-descriptions">several files</a>.</p>
+	<p><font size=-1><i>nb: Experienced users can skip following.</i></font></p>
+	<dl>You can set up a shortcut icon on your Mac/Linux desktop to point to the location of the file <cour>jeeva.py</cour>. But if you want to start from a terminal/console the following sets up to run whenever you type <cour>Jeeva</cour> at the command line, with one of the 2 following methods:
+	  <dt>Using an alias (easier method)</dt><dd>Put an <cour>alias</cour> into your <cour>.login</cour> file as follows:<pre>
+	  alias Jeeva "python path_to_Jeeva_folder/jeeva.py"
+	    </pre>You might have to re-login, or open a new Terminal, or type <cour>source .login</cour> for the change to take effect. You might prefer to put the alias command into the files .cshrc, .bashrc or .kshrc but I think .login is the best choice.</dd>
+	  <dt>Using a soft link</dt><dd><ul>
+	      <li>Make a soft link to <cour>jeeva.py</cour> from a folder already in your command path. <cour>echo $PATH</cour> will show you folders in your command path. Go to one such folder &amp make a soft link to Jeeva.py:
+		<pre class="literal-block">
+		  ln -s Path_to_Jeeva_folder/jeeva.py    Jeeva
+		</pre>
+		Many people keep a specific folder, such as $HOME/bin, to hold soft links to point to frequently used programs and utilities. But any folder in the command path will work, even the folder you just extracted your download to provided you put that folder in the command path.</li>
+	      <li>Typing <cour>rehash</cour> followed by <cour>which Jeeva</cour> should give the pathname to the soft link you just made.</li>
+	      <li>Ensure that the first line in the file jeeva.py looks something like: <cour>#!/usr/local/bin/python</cour> accurately reflects where your python interpreter executable is. If in doubt, type <cour>which python</cour>, and make that first line in <cour>jeeva.py</cour> reflect the location of the Python interpreter, taking care to enter the <cour>"#!"</cour> characters.</li>
+	      <li>The execute permission on the file <cour>jeeva.py</cour> should already be set correctly. But if you get a <cour>Permission denied</cour> error message later when trying to run Jeeva, then type
+		<pre>chmod u+x Path_to_Jeeva_folder/jeeva.py</pre>
+		and that should set your execute permission correctly and fix the problem.</li>
+	  </ul></dd>
+	</dl>
+      </div>
+      <div class="section" id="installing-in-windows">
+	<h2><a class="toc-backref" href="#id7">Installing in MS Windows</a></h2>
+	<p><u>Download & Install:</u> Click <a href="https://sourceforge.net/projects/jeeva-folder-utility/">here</a> and download the zip file <tech title="or later version">jeeva_1.6.2_Windows.zip</tech> which you will find after clicking on the <cour>Files</cour> tab on that page. The zip file contains a <tech title="made with pyinstaller">pre-compiled executable</tech>. <tech title="Either with a Windows utility or something like 7z, available at Sourceforge">Extract</tech> the contents of the zip. A directory/folder <cour>jeeva</cour> will contain <cour>jeeva.exe</cour> and several other files which are important as they contain and use a Python interpreter so do not delete them. Either add this folder to your PATH environment variable, or choose a folder already in your PATH, and add a file named jeeva.bat which will consist of something like the following lines:
+<pre>
+  @echo off 
+  REM This is to run jeeva, a folder comparison and mirroring script
+  C:\Users\YOURUSERNAME\PLACE_YOU_DOWNLOADED_TO\Jeeva\jeeva.exe %*
+  REM or an example with with Source and Destination roots hardwired:
+  C:\Users\YOURUSERNAME\PLACE_YOU_DOWNLOADED_TO\Jeeva\jeeva.exe --sroot C:\Users\YOURUSERNAME --droot F:\Destination_Folder %*
+  
+</pre>
+i.e. point to the location to which you extracted the zip file contents. (There is also a file <cour>sample_jeeva.bat</cour> in the unzipped folder.) Hopefully then, typing <cour>jeeva</cour> at a DOS prompt will work: Open a DOS window using <cour>cmd</cour> and test by typing jeeva --version or jeeva --help.
+	<p>I test Jeeva on a Windows 7 computer and am unsure whether it will work on newer Windows platforms. If <cour>jeeva --version</cour> works, that is a good sign. If not, it might be necessary to experiment with the Compatibility: go to the <cour>jeeva.exe</cour> file <cour>==> right-click ==> Properties ==> Compatibility</cour></p>
+      </div>
+    </div>
+
+    <!--                          --------------------Upgrading-------------------          -->
+    <div class="section" id="upgrading-jeeva">
+      <h1><a class="toc-backref" href="#id10">Upgrading <cite>Jeeva</cite></a></h1>
+      <p>Simply uninstall/delete your previous distribution and replace it with the new one. Or install the new one in a new location and edit your <cour>jeeva.bat</cour> file to point to it.</p>
+    </div>
+
+    <!--                          --------------------Using Jeeva-------------------          -->
+    <div class="section" id="using-jeeva">
+      <h1><a class="toc-backref" href="#id18">Using Jeeva</a></h1>
+      <p>The <cour>--overlap, --mtime</cour> and <cour>--copy</cour> options described later can be run in one of 2 modes,  either by specifiying  <cour>Source</cour> and <cour>Destination</cour> folders:
+	<pre>jeeva --overlap/--mtime/--copy   Source_folder    Destination_folder</pre>
+	or 2 folders that you call roots of the <cour>Source</cour> and <cour>Destination</cour> folder systems are specified:
+	<pre>jeeva --overlap/--mtime/--copy   --sroot root_Source_folder    --droot root_Destination_folder</pre>
+	The first mode is more useful for running Jeeva once for a full directory tree.<br></br>
+	The second mode Jeeva is run from <cour>root_Source_folder</cour> or a folder below it, and <i>that</i> folder is taken to be the source folder. Jeeva will look for a folder of the same name and in a corresponding position below <cour>root_Destination_folder</cour>, and will define <i>that</i> to be the Destination folder. It will then proceed as it would for the first mode to copy or compare. This mode of operation is more useful than the first as it allows you to wander around in the source root folder tree and perform multiple compares and copys using the same repeated Jeeva command every time. Further, if your source and and destination roots are always the same you can hardwire them into your <cour>jeeva.bat</cour> file, (Apple/Linux: into a shell script or <cour>alias</cour> command) and not bother with typing the whole thing every time.</p>
+      <p>The descriptions below are tailored to the first mode, but apply to the second mode too, with the understanding of what the Source and Destination folders are. If you are unclear about how this works, experiment with --overlap, or --copy with --dryrun.</p>
+
+      <dl><dt>Comparing overlap:</dt><dd><cour>jeeva --overlap Source Dest</cour> compares the two directories Source and Dest, or, with <cour>--recursive</cour>, descends their directory trees and compares any corresponding directories. (<cour>--overlap</cour> used to be <cour>--compare</cour>.) For each directory 6 quantities are returned:
+	  <ol>
+	    <li>Number of regular files in source directory but not destination directory</li>
+	    <li>Number of regular files in both source and destination</li>
+	    <li>Number in destination but not source,</li>
+	    <li>(and 5,6) The same 3 corresponding values but for directories instead of for regular files</li>
+	  </ol>
+	  <p>Example: <pre>jeeva --overlap .\Videos    D:\Shaheen\Mirror\Videos</pre> produces:
+	    <pre>
+Videos (23,0,0 ; 16,3,0)
+	    </pre>
+	    indicating that the first (source) directory contains 23 regular files not in the second (destination) directory, 16 sub-dirs not in destination directory, and 3 sub-dirs are common to both directories. Adding <cour>--recursive</cour> produces similar output for the 3 sub-dirs that the source and destination have in common, going down 2 further sub-directory levels:
+	    <pre>
+Videos (23,0,0 ; 16,3,0)
+   |->2017 (0,13,0 ; 0,0,0)
+   |->Lumix (0,1,0 ; 1,2,0)
+      |->Ohio 2018 (20,60,91 ; 0,0,0)
+      |->India Trip Feb Mar 2018 (0,98,0 ; 0,0,0)
+   |->2018 (2,7,0 ; 0,0,0)
+	    </pre>
+	  <p>With <cour>--depth 1</cour> the display would only have gone down one level instead of all (both) levels. If <cour>--depth</cour> (or <cour>-d</cour>) is used, it is no longer necessary to also specify <cour>--recursive  / -r</cour>.</p>
+	  <p>With <cour>--details d_option</cour> option it displays actual file names in these 6 categories. d_option must be one of <cour>yes</cour>, <cour>query</cour> or a 6 character yes/no mask (<cour>e.g. "yyyyyy" or "ynynyn" or "nnnnnn"</cour>) to select which of the 6 quantities you wish detailed.</p>
+	  <p>If the directory tree is large the output could be voluminous. If you are <i>only</i> interested in seeing where the differences are between folders, add <cour>--skipsame</cour> which suppresses output for folders where <cour>source</cour> and <cour>dest</cour> have all files in common. If you are <i>only</i> interested in seeing where there are no differences between folders, add <cour>--onlysame</cour> which suppresses output for folders where <cour>source</cour> and <cour>dest</cour> do not have all file names in common.</p>
+	  </dd>
+	  <dt>Comparing file modification times:</dt><dd><cour>jeeva --mtime Source Dest</cour> compares the two directories Source and Dest, or, with <cour>--recursive</cour>, descends their directory trees and compares any corresponding directories. For each directory 3 quantities are returned:
+	    <ol>
+	      <li>Number of regular files newer in source directory than in destination directory</li>
+	      <li>Number of regular files same age in source directory and destination directory</li>
+	      <li>Number of regular files older in source directory than in destination directory</li>
+	    </ol>
+	    <p>With <cour>--details d_option</cour> option it displays actual file names in these 3 categories. d_option must be one of <cour>yes</cour>, <cour>query</cour> or a 3 character yes/no mask (<cour>e.g. "yyy" or "yny"</cour>) to select which of the 3 quantities you wish detailed.</p>
+	    <p>--dt permits defining a time interval such that if the modifcation times of 2 files differ by less than it, then they are consdered the same age. Takes 2 string args: (1) Value itself and (2) formatter in same style used by datetime.strptime. <br>eg <cour>--dt \"1 2 3\", \"%H %M %s\"</cour> ==> file mtimes that differ by less than 1 hour 2 min 3 seconds are considered same age. Default value = 0. Cannot exceed 12 hours.</p>
+	    <p>The other options <cour>--depth, --skipsame and --onlysame</cour> work much the same way as they do for the <cour>--overlap</cour>. e.g. <cour>--onlysame</cour> will only display stats where all the files in <cour>Source</cour> and <cour>Dest</cour> are the same age.</p>
+	    </dd>
+	    <dt>Copying:</dt><dd><p><cour> jeeva --copy mod Source Dest</cour> : copies regular files that have more recent modification time in Source. Files that are in Source but not in Dest are not copied. With --recursive, does same while descending tree structure. Never copies directory files.</p>
+	      <p><cour>jeeva --copy new Source Dest</cour> copies regular files that are in <cour>Source</cour> but not in <cour>Dest</cour>. With <cour>--recursive</cour>, does same while descending tree structure. With <cour>--recursive --mkdir yes (or --mkdir query)</cour>, additionally, directories that are in Source but not in Dest are created and copied along with their contents. If you answer <cour>yes</cour> to a query to copy a folder, (since shutil.copytree is used,) all its sub-folders will also be copied and you wil not have to laboriously descend its whole tree answering yes/no.</p>
+	      <p><cour>--copy newmod</cour> combines the 2 previous actions. Used to be <cour>--copy update</cour></p>
+	      <p>Option <cour>--dryrun</cour> shows what action would be taken without doing any actual copying, to allow a check beforehand.</p>
+	      <p>Both Source and Dest must exist beforehand. I decided it is better that use your OS's directory tree copying utility to initially create Dest, rather than that I implement something like a <cour>jeeva --copy all Source Dest</cour> option. If from command line, MS Windows use <cour>xcopy</cour> or <cour>robocopy</cour>. Linux/Unix/Apple use <cour>cp -ar</cour> or <cour>cp -r</cour></p>
+	      <p><cour>--ignorefile file1,file2,...</cour>: If present then the regular file names listed will not be copied. Useful especially in MS Windows which has an irritating habit of creating system files like <cour>desktop.ini</cour> and <cour>thumbs.db</cour> in <i>every</i> directory, and Jeeva attempts to copy them over to Destination, unsuccessfully because they are owned by System. If multiple files, separate with comma, no space. If Spaces present <u>within</u> a filename, surround whole option argument with double-quotes.  <b>Gotcha!:</b> When directories are copied, they are done in entirety (with shutil.copytree) and <u>no</u> check is made whether files in that directory are on the <cour>--ignorefile</cour> list.</p>
+	      <p><cour>--ignoredir dir1,dir2,...</cour>. Similar to above item but also the files and sub-folders in these ignored directories will also be ignored.</p>
+	    </dd>
+	  </dd>
+	  <dt>Case-sensitivity:</dt><dd><p>In MS Windows regular file names and folder names are case-insensitive: e.g. You cannot place 2 files called "MYFile" and "myfILE" in the same folder. In Linux/Unix names are case-sensitive and 2 such files <i>can</i> co-exist. Jeeva tests on OS-type and takes care of this automatically when comparing and copying. However 2 command line options: <cour>--cs</cour> and <cour>--ci</cour> permit user to over-ride and force case-sensitivity/case-insensitivity. If there is another OS out there which is also case-insensitive then use <cour>--ci</cour> but normally it should not be necessary to use them.</p>
+	  </dd>
+	</dl>
+    </div>
+      
+
+    <!--                          --------------------Assorted Topics-------------------          -->
+    <div class="section" id="customization">
+      <h2><a class="toc-backref" href="#id23">Customization</a></h2>
+      <p>There is not much that can be done in the way of customization. Whatever there is is done through editing the file <cour>jeeva.py</cour>, therefore it is not available to Windows precompiled binary users. Near the top of the file are the folowing lines which change formatting of output for the --overlap option:
+	<pre>
+#used for formatting of output for --overlap
+INDENT_INCREMENT = "   "
+INDENT_ARROW = "|->"
+WIDTH_PRINTINDENTWIDTH = 65      #change this if want to narrow/widen output field for the --overlap output
+	</pre>
+      </p>
+      <p>As mentioned earlier, if your source and and destination roots are always the same you can hardwire them into your <cour>jeeva.bat</cour> file, (Apple/Linux: into a shell script or <cour>alias</cour> command) and not have to worry about typing the whole thing every time.</p>
+    </div>
+    <div class="section" id="assorted-topics">
+      <h1><a class="toc-backref" href="#id54">Assorted Topics</a></h1>
+      <div class="section" id="file-descriptions">
+	<h2><a class="toc-backref" href="#id55">File Descriptions</a></h2>
+	<p>The Python users distribution consists of the following files:
+	  <dl><dt>jeeva.py</dt><dd>Main program</dd>
+	    <dt>printindentwidth.py</dt><dd>Utility to make pretty looking output</dd>
+	  </dl>
+	  </p>
+	<p>The MS Windows distribution consists of the following files after unzipping:
+	  <dl>
+	    <dt>jeeva.exe</dt><dd>Executable binary</dd>
+	    <dt>sample_jeeva.bat</dt><dd>A sample DOS batch file</dd>
+	    <dt>Other files</dt><dd>These can be ignored, but do not touch (<i>or delete</i>), are important as they contain and use a Python interpreter.</dd>
+	</dl></p>
+	</dl>
+      </div>
+      
+    </div>
+    
+    <!--                          --------------------Release Notes-------------------          -->
+    <div class="section" id="release-notes">
+      <h1><a class="toc-backref" href="#id70">Release Notes &amp SHA256SUMS</a></h1>
+      <table>         <!--EGOF table-->
+	<caption>Dates and Comments of past releases</caption>
+	<tr><th>Release</th><th>Date</th><th>Comment</th></tr>
+	<tr><td>1.4.4</td><td>28th Sept 2018</td><td>#-----#</td></tr>
+	<tr><td>1.4.5</td><td>2nd Nov 2018</td><td>New --sroot and --droot capability.</td></tr>
+	<tr><td>1.5.1</td><td>22nd Dec 2018</td><td>New --depth option. Easier-to-read output for --compare</td></tr>
+	<tr><td>1.6.2</td><td>28th Nov 2019</td><td>New options --ci and --cs for case-sensitivity. New option <cour>--skipsame</cour>. New options <cour>--ignorefile, --ignoredir</cour>. <cour>--copy</cour> more flexible: mod | new | newmod. If jeeva not executed from a location under <cour>--sroot</cour> warning issued. <cour>--compare</cour> renamed <cour>--overlap</cour>. Improved error listing at end of program execution.</td></tr>
+      </table>
+      <br></br><br></br><br></br><br></br>
+      <p>The SHA256SUM hashing algorithm is is a guard against malicious tampering of a file by an outsider. To verify that a file you downloaded has the same SHA256SUM as the table below. :
+	<ul>
+	  <li>On Unix/Linux/Apple type <cour>sha256sum filename</cour></li>
+	  <li>On MS Windows type <cour>certutil -hashfile filename SHA256</cour></li>
+	</ul>
+	The value you get should agree with the value in the table below. if not, inform me</p>
+      
+      <center><table>
+	  <caption>SHA256SUMS of releases</caption>
+	  <tr><th colspan=2>Release 1.6.2</th></tr>    <!--EGOF table multicolumn-->
+	  <tr><th>SHA256SUM</th><th>Filename</th></tr>
+	  <tr><td>26980111a3b265f9799c5a3cd460044b484d5fd5432157523f9e2891e57072bb</td><td>  jeeva.py</td></tr>
+	  <tr><td>328d70e19863bce9b7c4e0d0c3534cb2487871e70c90ef8d9bba9597fce6fa1c</td><td>  printindentwidth.py</td></tr>
+	  <tr><td>ce11a2a7b084699cea08e5f4df43c6bb8d8162cf600b3ca899b38cafa0456cca</td><td>  Jeeva_1.6.2.tar</td></tr>
+	  <tr><td>2df4095e85f4355acf389062157edf5e6de725f63029899d1fa16b69e08c1904</td><td>  Jeeva_1.6.2.zip</td></tr>
+	  <tr><td>1f08e01a025d97b3f939e30ecbcaf1b3094987182e91af82e7fa1dfed3589d59</td><td>  JeevaSource_1.6.2.zip</td></tr>
+	  <tr><td>78077e06d05a4ff0c149594ea022bcadc43b5bac83022fa161e41c4e6653c245</td><td>  jeeva_1.6.2.Windows.zip</td></tr>
+	  <tr><th colspan=2>Release 1.5.1</th></tr>    <!--EGOF table multicolumn-->
+	  <tr><th>SHA256SUM</th><th>Filename</th></tr>
+	  <tr><td>286a0b25ea8209ec7916131f5feef8af2285fa20519a82b17c628cf06c405361</td><td>  jeeva.py</td></tr>
+	  <tr><td>328d70e19863bce9b7c4e0d0c3534cb2487871e70c90ef8d9bba9597fce6fa1c</td><td>  printindentwidth.py</td></tr>
+	  <tr><td>09c9b739b84a1668c9c0960a54a2fcdbcb14a76a11255ed38fb2d7387f254dd7</td><td>  Jeeva_1.5.1.tar</td></tr>
+	  <tr><td>11a79994aa3d959ccade789caf2651e75c199520fdf193adbb1d791d4b20428a</td><td>  Jeeva_1.5.1.zip</td></tr>
+	  <tr><td>bfe4eae487022cb3656ffbbd39ea8af7211063df5ef5d6c1cb3f1f3f0f49a363</td><td>  JeevaSource_1.5.1.zip</td></tr>
+	  <tr><td>6198bbdd782683a7519925c854a723277e257a49ac9dc1163c5e7018a0e577a8</td><td>  jeeva_1.5.1_Windows.zip</td></tr>
+	  <tr><th colspan=2>Release 1.4.5</th></tr>    <!--EGOF table multicolumn-->
+	  <tr><th>SHA256SUM</th><th>Filename</th></tr>
+	  <tr><td>ce5e688e193ef55d37f4d4d11c0c3ce2ff40ee76036a0a2af42c2f28620b3266</td><td>  jeeva.py</td></tr>
+	  <tr><td>328d70e19863bce9b7c4e0d0c3534cb2487871e70c90ef8d9bba9597fce6fa1c</td><td>  printindentwidth.py</td></tr>
+	  <tr><td>b30b6c86dd6164336ebbd99995cb608138eccf1060f2fc4662a722bf5aa73fae</td><td>  Jeeva_1.4.5.tar</td></tr>
+	  <tr><td>2acb58217bc352adfd152690e7c3acfefdb9b25baaae489634da8eb3c754bdb2</td><td>  Jeeva_1.4.5.zip</td></tr>
+	  <tr><td>ae3e2b661076d19d28dc15cacc63fa18e4c9db3ea08817f79821b2fad579df23</td><td>  JeevaSource_1.4.5.zip</td></tr>
+	  <tr><td>f9e899cd82cc6d155b11dbeb8897639eb610cf289d47e868eae6ea72ac9776b2</td><td>  jeeva_1.4.5_Windows.zip</td></tr>
+	  
+      </table></center>
+    </div>
+
+    <div class="section" id="outdated-features">
+      <h1><a class="toc-backref" href="#id84">Outdated Features</a></h1>
+      <p>--compare deprecated: Use --overlap</p>
+      <p><cour>--copy update</cour> deprecated: Use <cour>--copy newmod</cour></p>
+    </div>
+    
+    <div class="section" id="acknowledgements">
+      <h1><a class="toc-backref" href="#id90">Acknowledgements</a></h1>
+      <p>Thank you very much to the following people for:</p>
+      <dl>
+	<dt>Tools and libraries</dt>
+	<dd>The authors of the Pyinstaller utilities</dd>
+	<dd>The authors of the Python modules: collections.</dd>
+      </dl>
+      <p>Mr Jeeva himself. Type <cour>jeeva --jeeva</cour> for some background on that.</p>
+    </div>
+    
+    <div>
+      <br><hr width="75%" size=3><br></br></hr></br>
+      <font size="-1">Last updated: <script lang="JavaScript">document.write(document.lastModified)</script></font>
+    </div>
+</div></body></html>
